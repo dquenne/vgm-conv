@@ -253,10 +253,10 @@ function parseValue(text: string): boolean | string | number | Array<any> {
   if (text === "false") {
     return false;
   }
-  if (/[0-9]+/.test(text)) {
+  if (/^[0-9]+/.test(text)) {
     return parseInt(text);
   }
-  if (/[0-9]+\.[0-9]+/.test(text)) {
+  if (/^[0-9]+\.[0-9]+/.test(text)) {
     return parseFloat(text);
   }
   return text;
