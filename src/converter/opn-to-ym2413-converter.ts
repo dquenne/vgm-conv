@@ -42,9 +42,41 @@ function _calcMainTotalLevel(data: number[]): number {
   }
 }
 
+// //   AR D1R D2R  RR D1L  TL  KS MUL DT1 DT2 AMS-EN
+// M1:   0   0   0  15  15   0   0   0   0   0   0
+function _check_is_slot_unused(data: number[], slot: number): boolean {
+  const dt = (data[0 + slot] >> 4) & 7;
+  const ml = data[0 + slot] & 15;
+  const tl = data[4 + slot] & 127;
+  const ks = (data[8 + slot] >> 6) & 3;
+  const ar = data[8 + slot] & 31;
+  const am = (data[12 + slot] >> 7) & 1;
+  const dr = data[12 + slot] & 31;
+  const sr = data[16 + slot] & 31;
+  const sl = (data[20 + slot] >> 4) & 15;
+  const rr = data[20 + slot] & 15;
+
+  if (tl >= 99) {
+    // just trying things out. If TL is 99, it's basically inaudible anyway
+    return true;
+  }
+  if (tl >= 60) {
+    if (ar == 31 && dr == 0 && sr == 0 && rr == 15 && ks == 0 && ml == 0 && dt == 0 && am == 0) {
+      return true;
+    }
+  }
+  return ar == 0 && dr == 0 && sr == 0 && rr == 15 && ks == 0 && ml == 0 && dt == 0 && am == 0;
+}
+
 function _normalizeTotalLevel(data: number[]): number[] {
   const alg = data[28] & 7;
   let min = 0;
+
+  for (let slot = 0; slot < 4; slot++) {
+    if (_check_is_slot_unused(data, slot)) {
+      data[4 + slot] = 127;
+    }
+  }
   switch (alg) {
     case 0:
     case 1:
@@ -66,11 +98,16 @@ function _normalizeTotalLevel(data: number[]): number[] {
       break;
     case 7:
       min = Math.min(data[5], data[6], data[7], data[8]);
+      data[4] -= min;
       data[5] -= min;
       data[6] -= min;
       data[7] -= min;
-      data[8] -= min;
       break;
+  }
+  for (let slot = 0; slot < 4; slot++) {
+    if (_check_is_slot_unused(data, slot)) {
+      data[4 + slot] = 127;
+    }
   }
   return data;
 }
