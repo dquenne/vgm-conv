@@ -392,7 +392,10 @@ export abstract class OPNToYM2413Converter extends VGMConverter {
         console.error(`"${hash}":${_voiceMapEntryString(vdef)}, // Used in CH:${Array.from(channels)}`);
       }
       if (this.opts.opmOutput) {
-        writeOpmVoiceData(this.opts.opmOutput, Object.values(this._voiceInfoMap));
+        console.error(`wrote VOPM voice data to ${this.opts.opmOutput}`);
+        writeOpmVoiceData(this.opts.opmOutput, Object.values(this._voiceInfoMap), this.opts);
+      } else {
+        console.error(`false opmOutput: ${this.opts.opmOutput}`);
       }
       return [cmd];
     }

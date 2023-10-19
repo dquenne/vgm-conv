@@ -1,13 +1,25 @@
 import fs from "fs";
+import { GD3TagObject } from "vgm-parser";
 import { OPNVoice, OPNSlotParam } from "ym-voice";
-
 const OPM_HEADER = "//VOPM tone data\n//Ripped by vgm-conv\n";
 
-function pad4(value: number) {
+function buildVOPMHeader(gd3tag: GD3TagObject): string {
+  return (
+    OPM_HEADER +
+    `
+//Track Title: ${gd3tag.trackTitle}
+//Game Name: ${gd3tag.gameName}
+//System: ${gd3tag.system}
+//Composer: ${gd3tag.composer}
+`
+  );
+}
+
+function pad4(value: number): string {
   return `${value}`.padStart(4, " ");
 }
 
-function toVOPM(voice: OPNVoice, id: number = 0, channels: string = "") {
+function toVOPM(voice: OPNVoice, id: number = 0, channels: string = ""): string {
   function convertSlot(slot: OPNSlotParam) {
     return [slot.ar, slot.dr, slot.sr, slot.rr, slot.sl, slot.tl, slot.ks, slot.ml, slot.dt].map(pad4).join("");
   }
@@ -24,9 +36,13 @@ C2:${convertSlot(voice.slots[3])}   0   ${pad4(voice.slots[0].am)}
 `;
 }
 
-export function writeOpmVoiceData(filename: string, voices: { opnVoice: OPNVoice; channels: Set<number> }[]) {
+export function writeOpmVoiceData(
+  filename: string,
+  voices: { opnVoice: OPNVoice; channels: Set<number> }[],
+  opts: { [key: string]: any }
+) {
   let opmOutput = "";
-  opmOutput += OPM_HEADER;
+  opmOutput += buildVOPMHeader(opts?.gd3tag || {});
 
   voices.forEach((voice, index) => {
     opmOutput += "\n" + toVOPM(voice.opnVoice, index, Array.from(voice.channels).join(","));

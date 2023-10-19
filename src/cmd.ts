@@ -357,6 +357,8 @@ function main(argv: string[]) {
 
     const opts = parseDefines(options.define);
 
+    opts.gd3tag = vgm.gd3tag;
+
     if (options.voiceTable) {
       try {
         const { voiceTable } = require(path.resolve(options.voiceTable));
